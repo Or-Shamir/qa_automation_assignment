@@ -1,12 +1,12 @@
+from playwright.sync_api import Page, Locator, expect
 import json
-from example_test import *
 
 class TrelloBoardPage:
-    def __init__(self, page):
+    def __init__(self, page: Page):
         self.page = page
 
 
-    def trello_login(self,trello_email, trello_pass):
+    def trello_login(self,trello_email: str, trello_pass: str):
         self.page.goto("https://trello.com/b/2GzdgPlw/droxi")
 
         # If already logged in and redirected to board or homepage, skip
@@ -24,9 +24,11 @@ class TrelloBoardPage:
 
                 self.page.fill('input[data-testid="password"]', trello_pass)
                 self.page.click('button#login-submit')
+            return
 
         except Exception as e:
             print(f"Login skipped or elements not found (possibly already logged in): {e}")
+
         # Final check: confirm successful login
         assert "login" not in self.page.url, "Login failed or still on login page."
 

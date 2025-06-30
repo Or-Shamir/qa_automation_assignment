@@ -1,7 +1,7 @@
 import pytest
 import json
 from main import gmail_login
-
+from trello_page import TrelloBoardPage
 
 @pytest.fixture
 def example_of_injected_item():
@@ -29,32 +29,6 @@ def test_find_urgent_and_extract():
     - Labels
     - Current status (To Do, In Progress, Done)
     """
-
-def test_start_session():
-    import pytest
-    from playwright.sync_api import sync_playwright
-    import os
-
-    @pytest.fixture(scope="session")
-    def playwright_browser():
-        with sync_playwright() as p:
-            browser = p.chromium.launch(headless=False, slow_mo=500)
-            yield browser
-            browser.close()
-
-    @pytest.fixture(scope="function")
-    def page(playwright_browser):
-        context = playwright_browser.new_context()
-        page = context.new_page()
-        yield page
-        context.close()
-
-    @pytest.fixture(scope="session")
-    def trello_credentials():
-        return {
-            "email": os.getenv("TRELLO_EMAIL"),
-            "password": os.getenv("TRELLO_PASSWORD")
-        }
 
 
 def test_simple(example_of_injected_item):
