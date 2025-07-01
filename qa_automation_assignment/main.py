@@ -34,7 +34,7 @@ def gmail_login():
 
   return creds
 
-
+#API
 
 def print_labels(creds):
     try:
@@ -75,3 +75,49 @@ def main(page):
 
 if __name__ == "__main__":
   main()
+
+
+
+  def get_all_cards_with_urgent_label(self) -> List[Dict]:
+        """Get all cards with 'Urgent' label across all columns"""
+
+        # Claud func
+
+        # urgent_cards = []
+        #
+        # # Get all lists (columns)
+        # lists = self.page.locator(self.list_selector).all()
+        #
+        # for list_element in lists:
+        #     # Get column name
+        #     column_name = list_element.locator("[data-testid='list-name']").text_content().strip()
+        #
+        #     # Get all cards in this column
+        #     cards = list_element.locator(self.card_selector).all()
+        #
+        #     for card in cards:
+        #         # Check if card has urgent label (red label)
+        #         urgent_labels = card.locator(self.urgent_label_selector).all()
+        #
+        #         if urgent_labels:
+        #             card_title = card.text_content().strip()
+        #
+        #             # Click on card to get more details
+        #             card.click()
+        #             self.wait_for_element(self.card_modal_selector)
+        #
+        #             # Extract card details from modal
+        #             description = self._get_card_description()
+        #             labels = self._get_card_labels()
+        #
+        #             urgent_cards.append({
+        #                 'title': card_title,
+        #                 'description': description,
+        #                 'labels': labels,
+        #                 'status': column_name
+        #             })
+        #
+        #             # Close modal
+        #             self._close_card_modal()
+
+        # return urgent_cards

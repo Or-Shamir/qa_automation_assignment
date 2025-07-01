@@ -7,21 +7,19 @@ import json
 @pytest.fixture(scope="session")
 def playwright_browser():
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False, slow_mo=500)
+        browser = p.chromium.launch(headless=False, slow_mo=5000)
         yield browser
         browser.close()
 
 @pytest.fixture(scope="function")
 def page(playwright_browser):
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
-        page = browser.new_page()
+        page = playwright_browser.new_page()
         yield page
-        browser.close()
+        page.close()
 
-@pytest.fixture(scope="session")
-def trello_credentials():
-    # Load from credentials.json instead of env vars
-    with open('../credentials.json', 'r') as f:
-        credentials = json.load(f)
-    return credentials
+# @pytest.fixture(scope="session")
+# def trello_credentials():
+#     # Load from credentials.json instead of env vars
+#     with open('../credentials.json', 'r') as f:
+#         credentials = json.load(f)
+#     return credentials

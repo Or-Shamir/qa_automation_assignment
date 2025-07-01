@@ -1,6 +1,8 @@
 import pytest
+from typing import List, Dict
 from qa_automation_assignment.page_objects.gmail_page import GmailPage
 from qa_automation_assignment.page_objects.trello_page import TrelloBoardPage
+from qa_automation_assignment.utils.utils import trello_credentials
 
 
 @pytest.fixture
@@ -18,11 +20,13 @@ def test_gmail_login(example_of_injected_item: dict[str, int]):
     assert example_of_injected_item.get('b', None) is None
     assert example_of_injected_item.get('a', None) == 1
 
-def test_main_func():
+def test_main_func(page):
   f = trello_credentials()
   trello = TrelloBoardPage(page)
   trello.trello_login(f['trello_email'], f['trello_pass'])
-  #
+  u_cards = trello.get_all_cards_with_urgent_label()
+  print(u_cards)
+
   # creds: Credentials = gmail_login()
   # return print_labels(creds)
 
