@@ -22,6 +22,6 @@ def page(playwright_browser):
 @pytest.fixture(scope="session")
 def trello_credentials():
     # Load from credentials.json instead of env vars
-    with open('credentials.json', 'r') as f:
+    with open('../credentials.json', 'r') as f:
         credentials = json.load(f)
     return credentials

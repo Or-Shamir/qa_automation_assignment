@@ -1,7 +1,7 @@
 import pytest
-import json
-from main import gmail_login
-from trello_page import TrelloBoardPage
+from qa_automation_assignment.page_objects.gmail_page import GmailPage
+from qa_automation_assignment.page_objects.trello_page import TrelloBoardPage
+
 
 @pytest.fixture
 def example_of_injected_item():
@@ -9,7 +9,8 @@ def example_of_injected_item():
 
 
 def test_gmail_login(example_of_injected_item: dict[str, int]):
-    creds = gmail_login()
+    gmail = GmailPage(page)
+    creds = GmailPage.gmail_login()
 
     assert len(creds.client_id) > 0
     # assert creds.token_uri == "https://oauth2.googleapis.com/token"
@@ -17,6 +18,13 @@ def test_gmail_login(example_of_injected_item: dict[str, int]):
     assert example_of_injected_item.get('b', None) is None
     assert example_of_injected_item.get('a', None) == 1
 
+def test_main_func():
+  f = trello_credentials()
+  trello = TrelloBoardPage(page)
+  trello.trello_login(f['trello_email'], f['trello_pass'])
+  #
+  # creds: Credentials = gmail_login()
+  # return print_labels(creds)
 
 
 def test_find_urgent_and_extract():

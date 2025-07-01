@@ -1,4 +1,3 @@
-from playwright.sync_api import sync_playwright
 import json
 import os.path
 from google.auth.transport.requests import Request
@@ -6,7 +5,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-from trello_page import TrelloBoardPage
+from qa_automation_assignment.page_objects.trello_page import TrelloBoardPage
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://mail.google.com/"]
@@ -74,5 +73,5 @@ def main(page):
   return print_labels(creds)
 
 
-# if __name__ == "__main__":
-#   main()
+if __name__ == "__main__":
+  main()
