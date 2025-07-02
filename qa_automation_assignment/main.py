@@ -121,3 +121,20 @@ if __name__ == "__main__":
         #             self._close_card_modal()
 
         # return urgent_cards
+
+        def open_card(self, card_name):
+          # פותח את הכרטיס לפי השם שלו
+          self.page.locator(f'text="{card_name}"').first.click()
+
+        def get_card_title(self):
+          return self.page.locator(self.card_title_locator).inner_text()
+
+        def get_card_labels(self):
+          labels = self.page.locator(self.card_labels_locator).all()
+          return [label.inner_text() for label in labels]
+
+        def get_card_description(self):
+          return self.page.locator(self.card_description_locator).inner_text()
+
+        def close_card(self):
+          self.page.locator(self.close_button_locator).click()

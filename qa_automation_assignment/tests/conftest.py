@@ -7,7 +7,11 @@ import json
 @pytest.fixture(scope="session")
 def playwright_browser():
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False, slow_mo=5000)
+        browser = p.chromium.launch(
+            headless=False,
+            slow_mo=500,
+            args=['--start-maximized']
+        )
         yield browser
         browser.close()
 
@@ -23,3 +27,4 @@ def page(playwright_browser):
 #     with open('../credentials.json', 'r') as f:
 #         credentials = json.load(f)
 #     return credentials
+
