@@ -3,7 +3,17 @@ from typing import List, Dict
 from qa_automation_assignment.page_objects.gmail_page import GmailPage
 from qa_automation_assignment.page_objects.trello_page import TrelloBoardPage
 from qa_automation_assignment.utils.utils import trello_credentials
+import json
+import os.path
+from google.auth.transport.requests import Request
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+from qa_automation_assignment.page_objects.trello_page import TrelloBoardPage
 
+# If modifying these scopes, delete the file token.json.
+SCOPES = ["https://mail.google.com/"]
 
 @pytest.fixture
 def example_of_injected_item():

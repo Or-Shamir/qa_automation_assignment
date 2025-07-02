@@ -65,7 +65,7 @@ class TrelloBoardPage:
             column = columns.nth(i)
 
             # כותרת העמודה
-            column_title = column.page.get_by_test_id("list-name-textarea").first.input_value()
+            column_title = column.nth(i).page.get_by_test_id("list-name-textarea").all_text_contents()
 
             # כרטיסים בעמודה
             visable_cards = column.locator('[data-testid="list-card-wrapper"]:visible')        #.page.get_by_test_id("list-card-wrapper").filter()

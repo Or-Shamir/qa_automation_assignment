@@ -61,13 +61,11 @@ def load_credentials():
     return json.load(f)
 
 
-def main(page):
+def main():
   """Shows basic usage of the Gmail API.
   Lists the user's Gmail labels.
   """
-  f = load_credentials()
-  trello = TrelloBoardPage(page)
-  trello.trello_login(f['trello_email'], f['trello_pass'])
+
 
   creds: Credentials = gmail_login()
   return print_labels(creds)
@@ -77,9 +75,9 @@ if __name__ == "__main__":
   main()
 
 
-
+"""
   def get_all_cards_with_urgent_label(self) -> List[Dict]:
-        """Get all cards with 'Urgent' label across all columns"""
+      "Get all cards with 'Urgent' label across all columns
 
         # Claud func
 
@@ -138,3 +136,5 @@ if __name__ == "__main__":
 
         def close_card(self):
           self.page.locator(self.close_button_locator).click()
+
+"""
