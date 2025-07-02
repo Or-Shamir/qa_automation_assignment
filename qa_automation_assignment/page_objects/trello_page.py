@@ -2,7 +2,6 @@ from playwright.sync_api import Page, Locator, expect
 import json
 from typing import List, Dict, Any
 
-
 class TrelloBoardPage:
     def __init__(self, page: Page):
         self.page = page
@@ -11,7 +10,7 @@ class TrelloBoardPage:
         self.filter_x_btn = self.page.get_by_role("button", name="Close popover")
         self.find_n_of_lists_in_board = self.page.get_by_test_id("list-wrapper")
         self.card_title_locator = self.page.get_by_test_id("card-name")
-        self.card_labels_locator = self.page.get_by_test_id("card-back-labels-container")
+        self.card_labels_locator = self.page.get_by_test_id("card-back-labels-container") ##compact-card-label
         self.card_description_locator = self.page.get_by_test_id("description-content-area")
         self.card_x_btn = self.page.get_by_role("button", name="Close popover")
 
@@ -64,29 +63,28 @@ class TrelloBoardPage:
         for i in range(num_of_columns):
             column = columns.nth(i)
 
-            # כותרת העמודה
-            column_title = column.nth(i).page.get_by_test_id("list-name-textarea").all_text_contents()
+            # כותרת העמודה - לקחת את הפריט הראשון מהרשימה
+            column_title_list = column.get_by_test_id("list-name-textarea").all_text_contents()
+            column_title = column_title_list[0]
 
             # כרטיסים בעמודה
-            visable_cards = column.locator('[data-testid="list-card-wrapper"]:visible')        #.page.get_by_test_id("list-card-wrapper").filter()
-            num_of_cards = visable_cards.count()
+            visible_cards = column.locator('[data-testid="list-card-wrapper"]:visible')
+            num_of_cards = visible_cards.count()
             print(f"Found {num_of_cards} cards in column '{column_title}'")
 
             card_titles = []
             for j in range(num_of_cards):
-                card_title = visable_cards.nth(j).page.get_by_test_id('card-name').first.inner_text()
+                card_title = visible_cards.nth(j).page.get_by_test_id('card-name').first.inner_text()
                 card_titles.append(card_title)
-                j += 1
 
             columns_data[column_title] = card_titles
-            i += 1
 
         return columns_data
 
 
-#מוציאה מידע מכל כרטיס ושומרת
+     #מוציאה מידע מכל כרטיס ושומרת
     def extract_info_from_filtered_cards(self):
-        cards = self.page.locator('.list-card')
+        cards = self.page.locator('[data-testid="list-card-wrapper"]:visible')
         all_card_data = []
 
         for i in range(cards.count()):
@@ -97,19 +95,33 @@ class TrelloBoardPage:
             card.click()
 
             # שולפת פרטי כרטיס
-            title = self.card_title_locator.inner_text()
-            labels = [label.inner_text() for label in self.card_labels_locator.all()]
-            description = self.card_description_locator.inner_text()
+            title = card_title  #self.card_title_locator.inner_text()
+            labels = [label.inner_text() for label in self.card_labels_locator.all()] #compact-card-label
+            # #description = self.page.get_by_test_id('description-content-area').inner_text()
+            try:
+                self.page.get_by_test_id("description-button").click()
+                self.page.locator('[data-testid="description-content-area"]').wait_for()
+
+                description = self.page.locator('[data-testid="description-content-area"]').inner_text()
+                #description = self.page.locator('[data-testid="description-content-area"]').all_inner_text()
+                #locator.wait_for(state="visible", timeout=5000)
+                #description = locator.inner_text()
+            except Exception as e:
+                print("⚠️ Description area not found or not visible:", e)
+                description = ""
+            status = self.page.locator("span.wl2C35O7dKV1wx").inner_text()
 
             # שומרת
             all_card_data.append({
                 "title": title,
                 "labels": labels,
-                "description": description
+                "description": description,
+                "status": status
             })
 
             # סוגרת את הכרטיס
-            self.page.get_by_role("button", name="Close popover").click()
+            self.page.get_by_role("button", name="Close dialog").click()
+
 
         return all_card_data
 
