@@ -27,3 +27,22 @@ Install dependencies using:
 
 ```bash
 pip install -r requirements.txt
+```
+
+
+
+## 🔐 Credentials Setup
+
+To run this project, you need to create the following credentials files locally:
+
+1. `credentials_Trello.json`
+2. `credentials_Gmail.json`
+
+Use the example files to create your own:
+
+```bash
+cp credentials_Trello.example.json credentials_Trello.json
+cp credentials_Gmail.example.json credentials_Gmail.json
+```
+
+Then, fill them in with your actual credentials. These files are excluded from version control using `.gitignore`.
