@@ -1,13 +1,11 @@
-from playwright.sync_api import sync_playwright
-import json
+
 import os.path
 from playwright.sync_api import Page, Locator, expect
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
+
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://mail.google.com/"]
@@ -41,40 +39,9 @@ class GmailPage:
 
 
 
-  def print_labels(creds):
-      try:
-        # Call the Gmail API
-        service = build("gmail", "v1", credentials=creds)
-        results = service.users().labels().list(userId="me").execute()
-
-        labels = results.get("labels", [])
-
-        if not labels:
-          print("No labels found.")
-          return
-        print("Labels:")
-        for label in labels:
-          print(label["name"])
-
-      except HttpError as error:
-        # TODO(developer) - Handle errors from gmail API.
-        print(f"An error occurred: {error}")
-
-
-  def load_credentials():
-    with open('../credentials.json') as f:
-      return json.load(f)
 
 
 
-    """Shows basic usage of the Gmail API.
-    Lists the user's Gmail labels.
-    """
-    f = load_credentials()
-    trello = TrelloBoardPage(page)
-    trello.trello_login(f['trello_email'], f['trello_pass'])
 
-    creds: Credentials = gmail_login()
-    return print_labels(creds)
 
 

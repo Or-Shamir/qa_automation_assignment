@@ -1,15 +1,14 @@
 
 import pytest
 from playwright.sync_api import sync_playwright
-import os
-import json
+
 
 @pytest.fixture(scope="session")
 def playwright_browser():
     with sync_playwright() as p:
         browser = p.chromium.launch(
             headless=False,
-            slow_mo=500,
+            slow_mo=1000,
             args=['--start-maximized']
         )
         yield browser
@@ -20,11 +19,4 @@ def page(playwright_browser):
         page = playwright_browser.new_page()
         yield page
         page.close()
-
-# @pytest.fixture(scope="session")
-# def trello_credentials():
-#     # Load from credentials.json instead of env vars
-#     with open('../credentials.json', 'r') as f:
-#         credentials = json.load(f)
-#     return credentials
 

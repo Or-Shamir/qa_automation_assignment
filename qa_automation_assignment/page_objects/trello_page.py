@@ -1,6 +1,5 @@
 from playwright.sync_api import Page, Locator, expect
-import json
-from typing import List, Dict, Any
+import re
 
 class TrelloBoardPage:
     def __init__(self, page: Page):
@@ -41,19 +40,20 @@ class TrelloBoardPage:
         # Final check: confirm successful login
         assert "login" not in self.page.url, "Login failed or still on login page."
 
-    def get_all_cards_with_urgent_label(self) -> tuple[Locator, list[Any]]:
-        """Get all cards with 'Urgent' label across all columns"""
 
+    def get_all_cards_with_urgent_label(self) :
+        """Get all cards with 'Urgent' label across all columns"""
         # click on the 'filters' icon
         self.filters_btn.click()
         self.select_label("Urgent")
         self.card_x_btn.click()
         self.get_cards_per_column()
         data = self.extract_info_from_filtered_cards()
-        return  data
+        return data
 
-#אחרי סינון
+
     def get_cards_per_column(self):
+        """after filtering only the urgent cards"""
         columns = self.find_n_of_lists_in_board
         columns_data = {}
 
@@ -63,11 +63,11 @@ class TrelloBoardPage:
         for i in range(num_of_columns):
             column = columns.nth(i)
 
-            # כותרת העמודה - לקחת את הפריט הראשון מהרשימה
+            # Column title-takes the first one
             column_title_list = column.get_by_test_id("list-name-textarea").all_text_contents()
             column_title = column_title_list[0]
 
-            # כרטיסים בעמודה
+            # count how many cards in a column
             visible_cards = column.locator('[data-testid="list-card-wrapper"]:visible')
             num_of_cards = visible_cards.count()
             print(f"Found {num_of_cards} cards in column '{column_title}'")
@@ -78,12 +78,11 @@ class TrelloBoardPage:
                 card_titles.append(card_title)
 
             columns_data[column_title] = card_titles
-
         return columns_data
 
 
-     #מוציאה מידע מכל כרטיס ושומרת
     def extract_info_from_filtered_cards(self):
+        """Extract card data and save"""
         cards = self.page.locator('[data-testid="list-card-wrapper"]:visible')
         all_card_data = []
 
@@ -91,46 +90,41 @@ class TrelloBoardPage:
             card = cards.nth(i)
             card_title = card.locator(self.card_title_locator).inner_text()
 
-            # לוחצת על הכרטיס
+            # Open the card to extract details
             card.click()
-
-            # שולפת פרטי כרטיס
-            title = card_title  #self.card_title_locator.inner_text()
-            labels = [label.inner_text() for label in self.card_labels_locator.all()] #compact-card-label
-            # #description = self.page.get_by_test_id('description-content-area').inner_text()
-            try:
-                self.page.get_by_test_id("description-button").click()
-                self.page.locator('[data-testid="description-content-area"]').wait_for()
-
-                description = self.page.locator('[data-testid="description-content-area"]').inner_text()
-                #description = self.page.locator('[data-testid="description-content-area"]').all_inner_text()
-                #locator.wait_for(state="visible", timeout=5000)
-                #description = locator.inner_text()
-            except Exception as e:
-                print("⚠️ Description area not found or not visible:", e)
-                description = ""
+            title = card_title
+            labels = [label.inner_text() for label in self.card_labels_locator.all()]
             status = self.page.locator("span.wl2C35O7dKV1wx").inner_text()
+            try:
+                description = self.page.get_by_test_id("description-content-area").inner_text()
+            except Exception as e:
+                print(f"⚠️ Description not found for card '{title}': {e}")
+                description = ""
 
-            # שומרת
-            all_card_data.append({
+            card_data = {
                 "title": title,
                 "labels": labels,
-                "description": description,
-                "status": status
-            })
+                "status": status,
+                "description": description
+            }
+            all_card_data.append(card_data)
 
-            # סוגרת את הכרטיס
+            # Close card modal
             self.page.get_by_role("button", name="Close dialog").click()
 
+            # ✅ Print card info nicely
+            print("\n📌 Card Details:")
+            print(f"🔹 Title      : {title}")
+            cleaned_labels = [label.strip().replace('\n', ' , ') for label in labels]
+            print(f"🔸 Labels     : {' , '.join(cleaned_labels) if cleaned_labels else 'No labels'}")
+            print(f"🔹 Status     : {status}")
+            print(f"🔸 Description: {description if description else 'No description'}")
 
-        return all_card_data
-
-
-
-
+        print(f"\n✅ Total cards processed: {len(all_card_data)}")
+        # return all_card_data
 
     def select_label(self, label_name):
-
+        """scroll down inside the filter dialog, find the Labels section and choose 'Urgent' in dropdown"""
         labels_section = self.page.locator('p.pLccPkFlgt7FfH', has_text="Labels")
         labels_section.scroll_into_view_if_needed()
         labels_section.wait_for(state='visible')
@@ -146,17 +140,62 @@ class TrelloBoardPage:
         option.scroll_into_view_if_needed()
         option.click()
 
-        # # פותח את התפריט
-        # self.page.get_by_placeholder("Select labels").click()
-        #
-        # # לוקח את הרשימה שנפתחה
-        # dropdown_options = self.page.locator('[role="listbox"]')
-        #
-        # # בודק אם הלייבל קיים
-        # target_option = dropdown_options.locator(f"text={label_name}")
-        # if target_option.count() == 0:
-        #     raise Exception(f"Label '{label_name}' not found in dropdown options.")
-        #
-        # # מגלגל אליו אם צריך ולוחץ
-        # target_option.scroll_into_view_if_needed()
-        # target_option.click()
+    def test_validate_specific_card_details(self):
+        """find specific card and extract data to validate expected values"""
+        errors = []
+        card_title = "summarize the meeting"
+        try:
+            card = self.page.get_by_test_id("card-name").filter(has_text=card_title).first
+            card.click()
+        except Exception as e:
+            errors.append(f"❌ Failed to open card '{card_title}': {e}")
+            # If failed to open the card, no point to continue
+            print("\n".join(errors))
+            return
+
+        # Validate Title
+        try:
+            header_title = self.page.get_by_test_id("card-back-title-input").input_value()
+            if header_title.strip() != card_title:
+                errors.append(f"❌ Title mismatch: got '{header_title.strip()}', expected '{card_title}'")
+        except Exception as e:
+            errors.append(f"❌ Failed to read title: {e}")
+
+        # Validate Description
+        try:
+            description = self.page.get_by_test_id("description-content-area").inner_text()
+            clean_description = re.sub(r'\s+', ' ', description.strip())
+            expected = "For all of us Please do so"
+
+            if clean_description != expected:
+                errors.append(
+                    f"❌ Description mismatch: got '{description.strip()}', expected '{expected}' (after normalization)")
+        except Exception as e:
+            errors.append(f"❌ Failed to read description: {e}")
+
+        # Validate Labels
+        try:
+            labels = [label.inner_text() for label in self.card_labels_locator.all()]
+            if not any("New" in label for label in labels):
+                errors.append(f"❌ 'New' label not found. Found labels: {labels}")
+        except Exception as e:
+            errors.append(f"❌ Failed to read labels: {e}")
+
+        # Validate status (column name inside modal)
+        try:
+            status = self.page.locator("span.wl2C35O7dKV1wx").inner_text().strip()
+            if status != "To Do":
+                errors.append(f"❌ Status mismatch: found '{status}' (expected 'To Do')")
+        except Exception as e:
+            errors.append(f"❌ Failed to read status: {e}")
+
+        # Closing the dialog
+        self.page.get_by_role("button", name="Close dialog").click()
+
+
+        # Summary
+        if errors:
+            print("\n".join(errors))
+            assert False, "❌ Some validations failed"
+        else:
+            print("✅ All validations passed for 'summarize the meeting' card.")
